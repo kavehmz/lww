@@ -104,7 +104,7 @@ func BenchmarkSet_get(b *testing.B) {
 	s := Set{}
 	s.init()
 	for i := 0; i < b.N; i++ {
-		s.set(1, time.Now())
+		s.set(i, time.Now())
 	}
 	b.ResetTimer()
 
