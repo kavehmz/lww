@@ -9,4 +9,4 @@ LWW-element-set is a set that its elements have timestamp. Add and remove will s
 
 Queries over LWW-set will check both add and remove timestamps to decide about state of each element is being existed to removed from the list.
 */
-package lwwes
+package lww
