@@ -1,7 +1,6 @@
 package lww
 
 import (
-	"reflect"
 	"testing"
 	"time"
 )
@@ -70,13 +69,16 @@ func TestSet_get(t *testing.T) {
 func TestSet_list(t *testing.T) {
 	s := Set{}
 	s.init()
-	l := []customType{{name: "John", age: 18}, {name: "Frank", age: 20}}
+	l := [2]customType{{name: "John", age: 18}, {name: "Frank", age: 20}}
 	s.set(l[0], time.Now())
 	s.set(l[1], time.Now())
 
 	a := s.list()
-	if reflect.DeepEqual(l, a) {
-		t.Error("list did not return correct memeber", a)
+	if a[0].(customType) != l[0] {
+		t.Error("list did not return correct memeber", a[0].(customType), l[0])
+	}
+	if a[1].(customType) != l[1] {
+		t.Error("list did not return correct memeber", a[1].(customType), l[1])
 	}
 }
 
