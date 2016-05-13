@@ -83,6 +83,9 @@ func BenchmarkLWW_Add_same(b *testing.B) {
 func BenchmarkLWW_Remove(b *testing.B) {
 	l := LWW{}
 	l.Init()
+	for i := 0; i < b.N; i++ {
+		l.Add(i, time.Now())
+	}
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
