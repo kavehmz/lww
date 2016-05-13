@@ -1,6 +1,7 @@
 package lww
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -100,10 +101,29 @@ func BenchmarkLWW_Remove(b *testing.B) {
 	}
 }
 
+func BenchmarkLWW_Exists(b *testing.B) {
+	l := LWW{}
+	l.Init()
+	for i := 0; i < b.N; i++ {
+		l.Add(i, time.Now())
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		l.Exists(i)
+	}
+}
+
 func ExampleLWW() {
 	l := LWW{}
 	l.Init()
 	e := "Any_Structure"
 	l.Add(e, time.Now().UTC())
 	l.Remove(e, time.Now().UTC().Add(time.Second))
+	fmt.Println(l.Exists(e))
+	l.Add(e, time.Now().UTC().Add(2*time.Second))
+	fmt.Println(l.Exists(e))
+	// Output:
+	// false
+	// true
 }
