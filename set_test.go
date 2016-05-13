@@ -74,11 +74,11 @@ func TestSet_list(t *testing.T) {
 	s.set(l[1], time.Now())
 
 	a := s.list()
-	if a[0].(customType) != l[0] {
-		t.Error("list did not return correct memeber", a[0].(customType), l[0])
+	if a[0].(customType) != l[0] && a[0].(customType) != l[1] {
+		t.Error("list did not return correct memeber", a[0].(customType), l[0], l[1])
 	}
-	if a[1].(customType) != l[1] {
-		t.Error("list did not return correct memeber", a[1].(customType), l[1])
+	if a[1].(customType) != l[0] && a[1].(customType) != l[1] {
+		t.Error("list did not return correct memeber", a[1].(customType), l[0], l[1])
 	}
 }
 
