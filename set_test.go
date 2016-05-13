@@ -1,7 +1,6 @@
 package lww
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -84,8 +83,8 @@ func TestSet_list(t *testing.T) {
 func BenchmarkSet_add_different(b *testing.B) {
 	s := Set{}
 	s.init()
-	fmt.Println(b.N)
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		s.set(i, time.Now())
 	}
@@ -94,9 +93,22 @@ func BenchmarkSet_add_different(b *testing.B) {
 func BenchmarkSet_add_same(b *testing.B) {
 	s := Set{}
 	s.init()
-
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		s.set("same_element", time.Now())
+	}
+}
+
+func BenchmarkSet_get(b *testing.B) {
+	s := Set{}
+	s.init()
+	for i := 0; i < b.N; i++ {
+		s.set(1, time.Now())
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		s.get(i)
 	}
 }
