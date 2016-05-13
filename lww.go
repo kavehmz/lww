@@ -1,5 +1,5 @@
 /*
-Package lwwes implements a Last-Writer-Wins (LWW) Element Set data structure.
+Package lww implements a Last-Writer-Wins (LWW) Element Set data structure.
 
 In distributed computing, a conflict-free replicated data type (CRDT) is a type of specially-designed data structure used to achieve strong eventual consistency (SEC) and monotonicity (absence of rollbacks).
 
@@ -10,3 +10,7 @@ LWW-element-set is a set that its elements have timestamp. Add and remove will s
 Queries over LWW-set will check both add and remove timestamps to decide about state of each element is being existed to removed from the list.
 */
 package lww
+
+func dummy() int {
+	return 1
+}
