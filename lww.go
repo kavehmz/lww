@@ -60,3 +60,25 @@ func (lww *LWW) Remove(e Element, t time.Time) {
 		lww.remove.set(e, t)
 	}
 }
+
+// Exists returns true if Element has a more recent record in add-set than in remove-set
+func (lww *LWW) Exists(e Element) bool {
+	a, aok := lww.add.get(e)
+	r, rok := lww.remove.get(e)
+	if !rok {
+		return aok
+	}
+	return a.UnixNano() > r.UnixNano()
+}
+
+// Get returns slice of Elements that "Exist".
+func (lww *LWW) Get() []Element {
+
+	l := make([]Element, 0, lww.add.len())
+	for _, e := range lww.add.list() {
+		if lww.Exists(e) {
+			l = append(l, e)
+		}
+	}
+	return l
+}

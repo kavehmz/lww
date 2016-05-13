@@ -25,39 +25,46 @@ func TestLWW_AddExistRemove(t *testing.T) {
 	e := element{name: "John", age: 18}
 	ts := time.Now()
 
+	if lww.Exists(e) {
+		t.Error("New LWW claims to containt an element")
+	}
+
 	lww.Add(e, ts)
-	if ts0, ok := lww.add.get(e); !ok || ts0 != ts {
-		t.Error("Add failed", ok, ts0)
-	}
-
-	ts = ts.Add(time.Second)
-	lww.Add(e, ts)
-	if ts0, ok := lww.add.get(e); !ok || ts0 != ts {
-		t.Error("Add failed to update the element with newer timestamp", ok, ts0)
-	}
-
-	tsOld := ts.Add(-10 * time.Second)
-	lww.Add(e, tsOld)
-	if ts0, ok := lww.add.get(e); !ok || ts0 != ts {
-		t.Error("Add failed to ignore the element with older timestamp", ok, ts0)
-	}
-
-	lww.Remove(e, ts)
-	if ts0, ok := lww.remove.get(e); !ok || ts0 != ts {
-		t.Error("Remove failed to add a new element", ok, ts0)
+	if !lww.Exists(e) {
+		t.Error("Newly added element does not exists and it should")
 	}
 
 	ts = ts.Add(time.Second)
 	lww.Remove(e, ts)
-	if ts0, ok := lww.remove.get(e); !ok || ts0 != ts {
-		t.Error("Remove failed to update the element with newer timestamp", ok, ts0)
+	if lww.Exists(e) {
+		t.Error("An element which was remove with a more recent timestmap must be removed and is not")
 	}
 
-	tsOld = ts.Add(-10 * time.Second)
-	lww.Remove(e, tsOld)
-	if ts0, ok := lww.remove.get(e); !ok || ts0 != ts {
-		t.Error("Remove failed to ignore the element with older timestamp", ok, ts0)
+	ts = ts.Add(time.Second)
+	lww.Add(e, ts)
+	if !lww.Exists(e) {
+		t.Error("An element which was remove and added again with a more recent timestamp does not exists")
 	}
+}
+
+func TestLWW_Get(t *testing.T) {
+	lww := LWW{}
+	lww.Init()
+	l := []customType{{name: "John", age: 18}, {name: "Betty", age: 22}}
+	lr := customType{name: "Frank", age: 20}
+	lww.Add(l[0], time.Now())
+	lww.Add(l[1], time.Now())
+	lww.Add(lr, time.Now())
+	lww.Remove(lr, time.Now().Add(time.Second))
+
+	a := lww.Get()
+	if a[0].(customType) != l[0] && a[0].(customType) != l[1] {
+		t.Error("list did not return correct memeber", a[0].(customType), l[0], l[1])
+	}
+	if a[1].(customType) != l[0] && a[1].(customType) != l[1] {
+		t.Error("list did not return correct memeber", a[1].(customType), l[0], l[1])
+	}
+
 }
 
 func BenchmarkLWW_Add_differnt(b *testing.B) {
