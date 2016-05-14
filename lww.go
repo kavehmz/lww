@@ -11,6 +11,52 @@ Queries over LWW-set will check both add and remove timestamps to decide about s
 */
 package lww
 
-func dummy() int {
-	return 1
+import "time"
+
+// TimedSet interface defines what is required for an underlying set for WWL.
+type TimedSet interface {
+	init()
+	len() int
+	get(Element) (time.Time, bool)
+	set(Element, time.Time)
+	list() []Element
+}
+
+// Element define a set member. To make it possible to almost any type of data Element is defined as an empty interface.
+// This means for if the element gets saved in the set and then retrieved, it needs type assertion.
+//  e := w.Get()
+//  client := e.(ClientType)
+//  fmt.Println(client.name)
+// Note: Element type must be usable as a hash key. Any comparable type can be used.
+type Element interface{}
+
+// LWW type a Last-Writer-Wins (LWW) Element Set data structure.
+type LWW struct {
+	add    TimedSet
+	remove TimedSet
+}
+
+// Init will initialize the underlying sets required for LWW.
+// Internally it works on two sets named "add" and "remove".
+func (lww *LWW) Init() {
+	lww.add = &Set{}
+	lww.remove = &Set{}
+	lww.add.init()
+	lww.remove.init()
+}
+
+// Add will add an Element to the add-set if it does not exists and updates its timestamp to
+// great one between current one and new one.
+func (lww *LWW) Add(e Element, t time.Time) {
+	if val, ok := lww.add.get(e); !ok || t.UnixNano() > val.UnixNano() {
+		lww.add.set(e, t)
+	}
+}
+
+// Remove will add an Element to the remove-set if it does not exists and updates its timestamp to
+// great one between current one and new one.
+func (lww *LWW) Remove(e Element, t time.Time) {
+	if val, ok := lww.remove.get(e); !ok || t.UnixNano() > val.UnixNano() {
+		lww.remove.set(e, t)
+	}
 }
