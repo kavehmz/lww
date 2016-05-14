@@ -47,6 +47,7 @@ func TestRedis(t *testing.T) {
 		t.Error("Can't setup redis for tests", err)
 	}
 	s := RedisSet{Conn: r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s.init()
 
 	if s.len() != 0 {
 		t.Error("New set if not empty")

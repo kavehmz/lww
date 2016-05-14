@@ -62,7 +62,6 @@ func (s *RedisSet) init() {
 
 	_, err := s.Conn.Do("DEL", s.SetKey)
 	s.checkErr(err)
-
 }
 
 func (s *RedisSet) set(e Element, t time.Time) {
