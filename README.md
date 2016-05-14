@@ -2,8 +2,8 @@
 
 [![Go Lang](http://kavehmz.github.io/static/gopher/gopher-front.svg)](https://golang.org/)
 [![GoDoc](https://godoc.org/github.com/kavehmz/crdt?status.svg)](https://godoc.org/github.com/kavehmz/crdt)
-[![Build Status](https://travis-ci.org/kavehmz/crdt.svg?branch=master)](https://travis-ci.org/kavehmz/crdt)
-[![Coverage Status](https://coveralls.io/repos/kavehmz/crdt/badge.svg?branch=master&service=github)](https://coveralls.io/github/kavehmz/crdt?branch=master)
+[![Build Status](https://travis-ci.org/kavehmz/crdt.svg?branch=extended)](https://travis-ci.org/kavehmz/crdt)
+[![Coverage Status](https://coveralls.io/repos/kavehmz/crdt/badge.svg?branch=extended&service=github)](https://coveralls.io/github/kavehmz/crdt?branch=extended)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kavehmz/crdt)](https://goreportcard.com/report/github.com/kavehmz/crdt)
 
 
