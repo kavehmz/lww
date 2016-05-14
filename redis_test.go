@@ -1,13 +1,15 @@
 package lww
 
 import (
+	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
 
-func TestRedis_init(t *testing.T) {
+func TestRedisSet_init(t *testing.T) {
 	r, _ := redis.Dial("tcp", ":6379")
 	s := RedisSet{}
 	s.init()
@@ -40,14 +42,22 @@ func TestRedis_init(t *testing.T) {
 	}
 }
 
-func TestRedis(t *testing.T) {
-	r, err := redis.Dial("tcp", "localhost:6379")
-	defer r.Close()
+func setupSet(t interface {
+	Error(...interface{})
+}, r *redis.Conn) RedisSet {
+	c, err := redis.Dial("tcp", "localhost:6379")
+	r = &c
 	if err != nil {
 		t.Error("Can't setup redis for tests", err)
 	}
-	s := RedisSet{Conn: r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s := RedisSet{Conn: *r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
 	s.init()
+	return s
+}
+
+func TestRedisSet(t *testing.T) {
+	var r *redis.Conn
+	s := setupSet(t, r)
 
 	if s.len() != 0 {
 		t.Error("New set if not empty")
@@ -81,4 +91,50 @@ func TestRedis(t *testing.T) {
 	if l[0] != "data" || l[1] != "new data" {
 		t.Error("List elements are not correct")
 	}
+}
+
+func BenchmarkRedisSet_add_different(b *testing.B) {
+	var r *redis.Conn
+	s := setupSet(b, r)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		s.set(strconv.Itoa(i), time.Now())
+	}
+}
+
+func BenchmarkRedisSet_add_same(b *testing.B) {
+	var r *redis.Conn
+	s := setupSet(b, r)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		s.set("test", time.Now().Add(time.Duration(i)*time.Microsecond))
+	}
+}
+
+func BenchmarkRedisSet_get(b *testing.B) {
+	var r *redis.Conn
+	s := setupSet(b, r)
+	for i := 0; i < b.N; i++ {
+		s.set(strconv.Itoa(i), time.Now())
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		s.get(strconv.Itoa(i))
+	}
+}
+
+func ExampleRedisSet() {
+	c, _ := redis.Dial("tcp", "localhost:6379")
+	s := RedisSet{Conn: c, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s.init()
+	s.set("Data", time.Unix(1451606400, 0))
+	ts, ok := s.get("Data")
+	fmt.Println(ok)
+	fmt.Println(ts.Unix())
+	// Output:
+	// true
+	// 1451606400
 }
