@@ -44,20 +44,20 @@ func TestRedisSet_init(t *testing.T) {
 
 func setupSet(t interface {
 	Error(...interface{})
-}, r *redis.Conn) RedisSet {
+}, r *redis.Conn, key string) RedisSet {
 	c, err := redis.Dial("tcp", "localhost:6379")
 	r = &c
 	if err != nil {
 		t.Error("Can't setup redis for tests", err)
 	}
-	s := RedisSet{Conn: *r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s := RedisSet{Conn: *r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: key}
 	s.init()
 	return s
 }
 
 func TestRedisSet(t *testing.T) {
 	var r *redis.Conn
-	s := setupSet(t, r)
+	s := setupSet(t, r, "TESTKEY")
 
 	if s.len() != 0 {
 		t.Error("New set if not empty")
@@ -95,7 +95,7 @@ func TestRedisSet(t *testing.T) {
 
 func BenchmarkRedisSet_add_different(b *testing.B) {
 	var r *redis.Conn
-	s := setupSet(b, r)
+	s := setupSet(b, r, "TESTKEY")
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
@@ -105,7 +105,7 @@ func BenchmarkRedisSet_add_different(b *testing.B) {
 
 func BenchmarkRedisSet_add_same(b *testing.B) {
 	var r *redis.Conn
-	s := setupSet(b, r)
+	s := setupSet(b, r, "TESTKEY")
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
@@ -115,7 +115,7 @@ func BenchmarkRedisSet_add_same(b *testing.B) {
 
 func BenchmarkRedisSet_get(b *testing.B) {
 	var r *redis.Conn
-	s := setupSet(b, r)
+	s := setupSet(b, r, "TESTKEY")
 	for i := 0; i < b.N; i++ {
 		s.set(strconv.Itoa(i), time.Now())
 	}
