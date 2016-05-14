@@ -19,7 +19,7 @@ Set
 
 Set is one implementation of TimedSet. It uses Go maps to store data. It is a fast but volatile implementation.
 
-Maps in theory have worse Big O of O(n) for differnt operations, but in practice they are almost reliable for O(1) as long as hash function and hash table implementations are good enough.
+Maps in theory have worse Big O of O(n) for different operations, but in practice they are almost reliable for O(1) as long as hash function and hash table implementations are good enough.
 
 Set is the default underlying for LWW if no other TimedSet are attached to AddSet or RemoveSet.
 
