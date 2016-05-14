@@ -10,8 +10,8 @@ import (
 func TestRedisSet_integration(t *testing.T) {
 	var ac redis.Conn
 	var rc redis.Conn
-	add := setupSet(nil, &ac, "TESTADD")
-	remove := setupSet(nil, &rc, "TESTREMOVE")
+	add := setupSet(t, &ac, "TESTADD")
+	remove := setupSet(t, &rc, "TESTREMOVE")
 
 	lww := LWW{AddSet: &add, RemoveSet: &remove}
 	lww.Init()
