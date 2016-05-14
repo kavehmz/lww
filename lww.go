@@ -8,6 +8,45 @@ One type of data structure used in implementing CRDT is LWW-element-set.
 LWW-element-set is a set that its elements have timestamp. Add and remove will save the timestamp along with data in two different sets for each element.
 
 Queries over LWW-set will check both add and remove timestamps to decide about state of each element is being existed to removed from the list.
+
+LWW
+
+lww package implements a LWW data structure in a modular way. It defines a TimedSet interface for underlying storage that can be used with LWW.
+
+lww implements two of storage underlying.
+
+Set
+
+Set is one implementation of TimedSet. It uses Go maps to store data. It is a fast but volatile data structure.
+
+Maps as have in theory worse Big O of O(n), but in practice they are almost reliable for O(1) operations as long as hash function and hash table implementations are good enough.
+
+Set is the default underlying for LWW if no other TimedSet are attached to AddSet or RemoveSet.
+
+Maps are by nature vulnerable to concurrent access. To avoid race problems Set uses a sync.RWMutex as its locking mechanism.
+
+RedisSet
+
+RedisSet is another implementation of TimedSet included in lww package. It uses Redis Scored Sets to store data.
+
+Redis nature of atomic operations makes it immune to race problem and there is no need to any extra lock mechanism. But it introduces other complexities.
+
+To keep the lww simple, handling of Redis connection for both AddSet and RemoveSet in case of RedisSet is passed to client.
+It is practical as Redis setup can vary based on application and client might want handle complex connection handling.
+
+Note that in theory AddSet and RemoveSet can have different underlying attached.
+This might be useful in applications which can predict higher magnitude of Adds compared to Removes. In that case application can implementation different types of TimedSet to optimize the setup
+
+Adding New underlying
+
+You add a new underlying you need to implement the necessary methods in your data-structure. They are defined in TimedSet interface.
+
+Assuming you do that and they work as expected you can initialize LWW like:
+
+  add    := MyUnderlying{param: "for_add"}
+  remove := MyUnderlying{param: "for_remove"}
+  lww    := LWW{AddSet:add, RemoveSet:remove}
+
 */
 package lww
 
