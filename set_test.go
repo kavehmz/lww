@@ -34,6 +34,12 @@ func TestSet_add(t *testing.T) {
 	if v, ok := s.members[a]; !ok || v != ts {
 		t.Error("Element was not changed correctly if timestamp is different", ok, v, ts)
 	}
+
+	ts1 := time.Unix(1, 0)
+	s.set(a, ts1)
+	if ts0, ok := s.get(a); !ok || ts0 != ts {
+		t.Error("Element with older timestamp is not ignored corretly")
+	}
 }
 
 func TestSet_len(t *testing.T) {
