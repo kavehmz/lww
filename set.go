@@ -16,35 +16,40 @@ type Set struct {
 	sync.RWMutex
 }
 
-func (s *Set) init() {
+//Init will do a one time setup for underlying set. It will be called from WLL.Init
+func (s *Set) Init() {
 	s.Lock()
 	defer s.Unlock()
 	s.members = make(map[Element]time.Time)
 }
 
-func (s *Set) set(e Element, t time.Time) {
+//Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
+func (s *Set) Set(e Element, t time.Time) {
 	s.Lock()
 	s.members[e] = t
 	s.Unlock()
 }
 
-func (s *Set) len() int {
+//Len must return the number of members in the set
+func (s *Set) Len() int {
 	s.RLock()
 	defer s.RUnlock()
 	return len(s.members)
 }
 
-func (s *Set) get(e Element) (time.Time, bool) {
+//Get returns timestmap of the element in the set if it exists and true. Otherwise it will return an empty timestamp and false.
+func (s *Set) Get(e Element) (time.Time, bool) {
 	s.RLock()
 	defer s.RUnlock()
 	val, ok := s.members[e]
 	return val, ok
 }
 
-func (s *Set) list() []Element {
+//List returns list of all elements in the set
+func (s *Set) List() []Element {
 	s.RLock()
 	defer s.RUnlock()
-	l := make([]Element, 0, s.len())
+	l := make([]Element, 0, s.Len())
 	for k := range s.members {
 		l = append(l, k)
 	}

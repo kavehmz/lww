@@ -42,7 +42,8 @@ func (s *RedisSet) checkErr(err error) {
 	s.LastState = nil
 }
 
-func (s *RedisSet) init() {
+//Init will do a one time setup for underlying set. It will be called from WLL.Init
+func (s *RedisSet) Init() {
 	if s.Conn == nil {
 		s.checkErr(errors.New("Conn must be set"))
 		return
@@ -64,18 +65,21 @@ func (s *RedisSet) init() {
 	s.checkErr(err)
 }
 
-func (s *RedisSet) set(e Element, t time.Time) {
+//Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
+func (s *RedisSet) Set(e Element, t time.Time) {
 	_, err := s.Conn.Do("ZADD", s.SetKey, roundToMicro(t), s.Marshal(e))
 	s.checkErr(err)
 }
 
-func (s *RedisSet) len() int {
+//Len must return the number of members in the set
+func (s *RedisSet) Len() int {
 	n, err := redis.Int(s.Conn.Do("ZCARD", s.SetKey))
 	s.checkErr(err)
 	return n
 }
 
-func (s *RedisSet) get(e Element) (val time.Time, ok bool) {
+//Get returns timestmap of the element in the set if it exists and true. Otherwise it will return an empty timestamp and false.
+func (s *RedisSet) Get(e Element) (val time.Time, ok bool) {
 	n, err := redis.Int(s.Conn.Do("ZSCORE", s.SetKey, s.Marshal(e)))
 	s.checkErr(err)
 	if err == nil {
@@ -85,7 +89,8 @@ func (s *RedisSet) get(e Element) (val time.Time, ok bool) {
 	return val, ok
 }
 
-func (s *RedisSet) list() []Element {
+//List returns list of all elements in the set
+func (s *RedisSet) List() []Element {
 	var l []Element
 	zs, err := redis.Strings(s.Conn.Do("ZRANGE", s.SetKey, 0, -1))
 	s.checkErr(err)

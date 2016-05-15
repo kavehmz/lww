@@ -57,11 +57,16 @@ import "time"
 
 // TimedSet interface defines what is required for an underlying set for WWL.
 type TimedSet interface {
-	init()
-	len() int
-	get(Element) (time.Time, bool)
-	set(Element, time.Time)
-	list() []Element
+	//Init will do a one time setup for underlying set. It will be called from WLL.Init
+	Init()
+	//Len must return the number of members in the set
+	Len() int
+	//Get returns timestmap of the element in the set if it exists and true. Otherwise it will return an empty timestamp and false.
+	Get(Element) (time.Time, bool)
+	//Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
+	Set(Element, time.Time)
+	//List returns list of all elements in the set
+	List() []Element
 }
 
 // Element define a set member. To make it possible to almost any type of data Element is defined as an empty interface.
@@ -89,30 +94,30 @@ func (lww *LWW) Init() {
 	if lww.RemoveSet == nil {
 		lww.RemoveSet = &Set{}
 	}
-	lww.AddSet.init()
-	lww.RemoveSet.init()
+	lww.AddSet.Init()
+	lww.RemoveSet.Init()
 }
 
 // Add will add an Element to the add-set if it does not exists and updates its timestamp to
 // great one between current one and new one.
 func (lww *LWW) Add(e Element, t time.Time) {
-	if val, ok := lww.AddSet.get(e); !ok || t.UnixNano() > val.UnixNano() {
-		lww.AddSet.set(e, t)
+	if val, ok := lww.AddSet.Get(e); !ok || t.UnixNano() > val.UnixNano() {
+		lww.AddSet.Set(e, t)
 	}
 }
 
 // Remove will add an Element to the remove-set if it does not exists and updates its timestamp to
 // great one between current one and new one.
 func (lww *LWW) Remove(e Element, t time.Time) {
-	if val, ok := lww.RemoveSet.get(e); !ok || t.UnixNano() > val.UnixNano() {
-		lww.RemoveSet.set(e, t)
+	if val, ok := lww.RemoveSet.Get(e); !ok || t.UnixNano() > val.UnixNano() {
+		lww.RemoveSet.Set(e, t)
 	}
 }
 
 // Exists returns true if Element has a more recent record in add-set than in remove-set
 func (lww *LWW) Exists(e Element) bool {
-	a, aok := lww.AddSet.get(e)
-	r, rok := lww.RemoveSet.get(e)
+	a, aok := lww.AddSet.Get(e)
+	r, rok := lww.RemoveSet.Get(e)
 	if !rok {
 		return aok
 	}
@@ -122,8 +127,8 @@ func (lww *LWW) Exists(e Element) bool {
 // Get returns slice of Elements that "Exist".
 func (lww *LWW) Get() []Element {
 
-	l := make([]Element, 0, lww.AddSet.len())
-	for _, e := range lww.AddSet.list() {
+	l := make([]Element, 0, lww.AddSet.Len())
+	for _, e := range lww.AddSet.List() {
 		if lww.Exists(e) {
 			l = append(l, e)
 		}
