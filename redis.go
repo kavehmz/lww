@@ -28,6 +28,7 @@ type RedisSet struct {
 	UnMarshal func(string) Element
 	// LastState is an error type that will return the error state of last executed redis command. Add redis connection are not shareable this can be used after each command to know the last state.
 	LastState error
+	setScript *redis.Script
 }
 
 func roundToMicro(t time.Time) int64 {
@@ -61,13 +62,15 @@ func (s *RedisSet) Init() {
 		return
 	}
 
+	s.setScript = redis.NewScript(1, `local c = tonumber(redis.call('ZSCORE', KEYS[1], ARGV[2])) ;if c then if tonumber(ARGV[1]) > c then redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) return tonumber(ARGV[2]) else return 0 end else return redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) end`)
+
 	_, err := s.Conn.Do("DEL", s.SetKey)
 	s.checkErr(err)
 }
 
 //Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
 func (s *RedisSet) Set(e Element, t time.Time) {
-	_, err := s.Conn.Do("ZADD", s.SetKey, roundToMicro(t), s.Marshal(e))
+	_, err := s.setScript.Do(s.Conn, s.SetKey, roundToMicro(t), s.Marshal(e))
 	s.checkErr(err)
 }
 

@@ -26,7 +26,9 @@ func (s *Set) Init() {
 //Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
 func (s *Set) Set(e Element, t time.Time) {
 	s.Lock()
-	s.members[e] = t
+	if val, ok := s.members[e]; !ok || t.UnixNano() > val.UnixNano() {
+		s.members[e] = t
+	}
 	s.Unlock()
 }
 
