@@ -79,6 +79,12 @@ func TestRedisSet(t *testing.T) {
 		t.Error("Element is not updated corretly")
 	}
 
+	ts1 := time.Unix(1, 0)
+	s.set(a, ts1)
+	if ts0, ok := s.get(a); !ok || ts0 != ts {
+		t.Error("Element with older timestamp is not ignored corretly")
+	}
+
 	s.set("new data", ts)
 	if ts0, ok := s.get(a); !ok || ts0 != ts {
 		t.Error("New Element is not added corretly")
