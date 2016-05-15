@@ -24,7 +24,9 @@ func (s *Set) init() {
 
 func (s *Set) set(e Element, t time.Time) {
 	s.Lock()
-	s.members[e] = t
+	if val, ok := s.members[e]; !ok || t.UnixNano() > val.UnixNano() {
+		s.members[e] = t
+	}
 	s.Unlock()
 }
 

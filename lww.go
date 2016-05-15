@@ -90,9 +90,7 @@ func (lww *LWW) Init() {
 // Add will add an Element to the add-set if it does not exists and updates its timestamp to
 // great one between current one and new one.
 func (lww *LWW) Add(e Element, t time.Time) {
-	if val, ok := lww.add.get(e); !ok || t.UnixNano() > val.UnixNano() {
-		lww.add.set(e, t)
-	}
+	lww.add.set(e, t)
 }
 
 // Remove will add an Element to the remove-set if it does not exists and updates its timestamp to
