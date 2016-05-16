@@ -22,10 +22,10 @@ type RedisSet struct {
 	Conn redis.Conn
 	// AddSet sets which key will be used in redis for the set.
 	SetKey string
-	// Marshal function needs to convert the Element to string. Redis can only store and retrieve string values.
-	Marshal func(Element) string
+	// Marshal function needs to convert the element to string. Redis can only store and retrieve string values.
+	Marshal func(interface{}) string
 	// UnMarshal function needs to be able to convert a Marshalled string back to a readable structure for consumer of library.
-	UnMarshal func(string) Element
+	UnMarshal func(string) interface{}
 	// LastState is an error type that will return the error state of last executed redis command. Add redis connection are not shareable this can be used after each command to know the last state.
 	LastState error
 	setScript *redis.Script
@@ -67,7 +67,7 @@ func (s *RedisSet) Init() {
 }
 
 //Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
-func (s *RedisSet) Set(e Element, t time.Time) {
+func (s *RedisSet) Set(e interface{}, t time.Time) {
 	_, err := s.setScript.Do(s.Conn, s.SetKey, roundToMicro(t), s.Marshal(e))
 	s.checkErr(err)
 }
@@ -80,7 +80,7 @@ func (s *RedisSet) Len() int {
 }
 
 //Get returns timestmap of the element in the set if it exists and true. Otherwise it will return an empty timestamp and false.
-func (s *RedisSet) Get(e Element) (val time.Time, ok bool) {
+func (s *RedisSet) Get(e interface{}) (val time.Time, ok bool) {
 	n, err := redis.Int(s.Conn.Do("ZSCORE", s.SetKey, s.Marshal(e)))
 	s.checkErr(err)
 	if err == nil {
@@ -91,8 +91,8 @@ func (s *RedisSet) Get(e Element) (val time.Time, ok bool) {
 }
 
 //List returns list of all elements in the set
-func (s *RedisSet) List() []Element {
-	var l []Element
+func (s *RedisSet) List() []interface{} {
+	var l []interface{}
 	zs, err := redis.Strings(s.Conn.Do("ZRANGE", s.SetKey, 0, -1))
 	s.checkErr(err)
 	for _, v := range zs {

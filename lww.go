@@ -62,20 +62,12 @@ type TimedSet interface {
 	//Len must return the number of members in the set
 	Len() int
 	//Get returns timestmap of the element in the set if it exists and true. Otherwise it will return an empty timestamp and false.
-	Get(Element) (time.Time, bool)
+	Get(interface{}) (time.Time, bool)
 	//Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
-	Set(Element, time.Time)
+	Set(interface{}, time.Time)
 	//List returns list of all elements in the set
-	List() []Element
+	List() []interface{}
 }
-
-// Element define a set member. To make it possible to almost any type of data Element is defined as an empty interface.
-// This means for if the element gets saved in the set and then retrieved, it needs type assertion.
-//  e := w.Get()
-//  client := e.(ClientType)
-//  fmt.Println(client.name)
-// Note: Element type must be usable as a hash key. Any comparable type can be used.
-type Element interface{}
 
 // LWW type a Last-Writer-Wins (LWW) Element Set data structure.
 type LWW struct {
@@ -98,22 +90,22 @@ func (lww *LWW) Init() {
 	lww.RemoveSet.Init()
 }
 
-// Add will add an Element to the add-set if it does not exists and updates its timestamp to
+// Add will add an element to the add-set if it does not exists and updates its timestamp to
 // great one between current one and new one.
-func (lww *LWW) Add(e Element, t time.Time) {
+func (lww *LWW) Add(e interface{}, t time.Time) {
 	lww.AddSet.Set(e, t)
 }
 
-// Remove will add an Element to the remove-set if it does not exists and updates its timestamp to
+// Remove will add an element to the remove-set if it does not exists and updates its timestamp to
 // great one between current one and new one.
-func (lww *LWW) Remove(e Element, t time.Time) {
+func (lww *LWW) Remove(e interface{}, t time.Time) {
 	if val, ok := lww.RemoveSet.Get(e); !ok || t.UnixNano() > val.UnixNano() {
 		lww.RemoveSet.Set(e, t)
 	}
 }
 
-// Exists returns true if Element has a more recent record in add-set than in remove-set
-func (lww *LWW) Exists(e Element) bool {
+// Exists returns true if element has a more recent record in add-set than in remove-set
+func (lww *LWW) Exists(e interface{}) bool {
 	a, aok := lww.AddSet.Get(e)
 	r, rok := lww.RemoveSet.Get(e)
 	if !rok {
@@ -122,10 +114,10 @@ func (lww *LWW) Exists(e Element) bool {
 	return a.UnixNano() > r.UnixNano()
 }
 
-// Get returns slice of Elements that "Exist".
-func (lww *LWW) Get() []Element {
+// Get returns slice of elements that "Exist".
+func (lww *LWW) Get() []interface{} {
 
-	l := make([]Element, 0, lww.AddSet.Len())
+	l := make([]interface{}, 0, lww.AddSet.Len())
 	for _, e := range lww.AddSet.List() {
 		if lww.Exists(e) {
 			l = append(l, e)

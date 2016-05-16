@@ -23,19 +23,19 @@ func TestRedisSet_init(t *testing.T) {
 		t.Error("No error for missing params")
 	}
 
-	s = RedisSet{Conn: r, Marshal: func(e Element) string { return e.(string) }}
+	s = RedisSet{Conn: r, Marshal: func(e interface{}) string { return e.(string) }}
 	s.Init()
 	if s.LastState == nil {
 		t.Error("No error for missing params")
 	}
 
-	s = RedisSet{Conn: r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }}
+	s = RedisSet{Conn: r, Marshal: func(e interface{}) string { return e.(string) }, UnMarshal: func(e string) interface{} { return e }}
 	s.Init()
 	if s.LastState == nil {
 		t.Error("No error for missing params")
 	}
 
-	s = RedisSet{Conn: r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s = RedisSet{Conn: r, Marshal: func(e interface{}) string { return e.(string) }, UnMarshal: func(e string) interface{} { return e }, SetKey: "TESTKEY"}
 	s.Init()
 	if s.LastState != nil {
 		t.Error("Error raised when all params are present and correct")
@@ -51,7 +51,7 @@ func setupSet(t interface {
 	if err != nil {
 		t.Error("Can't setup redis for tests", err)
 	}
-	s := RedisSet{Conn: *r, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: key}
+	s := RedisSet{Conn: *r, Marshal: func(e interface{}) string { return e.(string) }, UnMarshal: func(e string) interface{} { return e }, SetKey: key}
 	s.Init()
 	return s
 }
@@ -71,24 +71,24 @@ func TestRedisSet(t *testing.T) {
 		t.Error("Adding element to set failed")
 	}
 	if ts0, ok := s.Get(a); !ok || ts0 != ts {
-		t.Error("Element is not saved corretly", ts0, ok, ts)
+		t.Error("interface{} is not saved corretly", ts0, ok, ts)
 	}
 
 	ts = ts.Add(time.Second * 10)
 	s.Set(a, ts)
 	if ts0, ok := s.Get(a); !ok || ts0 != ts {
-		t.Error("Element is not updated corretly")
+		t.Error("interface{} is not updated corretly")
 	}
 
 	ts1 := time.Unix(1, 0)
 	s.Set(a, ts1)
 	if ts0, ok := s.Get(a); !ok || ts0 != ts {
-		t.Error("Element with older timestamp is not ignored corretly")
+		t.Error("interface{} with older timestamp is not ignored corretly")
 	}
 
 	s.Set("new data", ts)
 	if ts0, ok := s.Get(a); !ok || ts0 != ts {
-		t.Error("New Element is not added corretly")
+		t.Error("New interface{} is not added corretly")
 	}
 
 	l := s.List()
@@ -135,7 +135,7 @@ func BenchmarkRedisSet_get(b *testing.B) {
 
 func ExampleRedisSet() {
 	c, _ := redis.Dial("tcp", "localhost:6379")
-	s := RedisSet{Conn: c, Marshal: func(e Element) string { return e.(string) }, UnMarshal: func(e string) Element { return e }, SetKey: "TESTKEY"}
+	s := RedisSet{Conn: c, Marshal: func(e interface{}) string { return e.(string) }, UnMarshal: func(e string) interface{} { return e }, SetKey: "TESTKEY"}
 	s.Init()
 	s.Set("Data", time.Unix(1451606400, 0))
 	ts, ok := s.Get("Data")
