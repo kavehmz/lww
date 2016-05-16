@@ -63,9 +63,6 @@ func (s *RedisSet) init() {
 
 	//This Lua function will do a __atomic__ check and set of timestamp only in incremental way.
 	s.setScript = redis.NewScript(1, `local c = tonumber(redis.call('ZSCORE', KEYS[1], ARGV[2])) ;if c then if tonumber(ARGV[1]) > c then redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) return tonumber(ARGV[2]) else return 0 end else return redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) end`)
-
-	_, err := s.Conn.Do("DEL", s.SetKey)
-	s.checkErr(err)
 }
 
 func (s *RedisSet) set(e Element, t time.Time) {

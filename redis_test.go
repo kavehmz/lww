@@ -45,7 +45,8 @@ func TestRedisSet_init(t *testing.T) {
 func setupSet(t interface {
 	Error(...interface{})
 }, r *redis.Conn, key string) RedisSet {
-	c, err := redis.Dial("tcp", "localhost:6379")
+	c, _ := redis.Dial("tcp", "localhost:6379")
+	_, err := c.Do("DEL", key)
 	r = &c
 	if err != nil {
 		t.Error("Can't setup redis for tests", err)
