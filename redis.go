@@ -45,16 +45,14 @@ func (s *RedisSet) checkErr(err error) {
 
 const updateToLatest string = `
 local c = tonumber(redis.call('ZSCORE', KEYS[1], ARGV[2]))
-if c then
-	if tonumber(ARGV[1]) > c then
-		redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
-		return tonumber(ARGV[2])
-	else
-		return 0
-	end
+if not c or tonumber(ARGV[1]) > c then
+	redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
+	redis.call('PUBLISH', KEYS[1], ARGV[1] .. ":" .. ARGV[2])
+	return tonumber(ARGV[2])
 else
-	return redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
-end`
+	return 0
+end
+`
 
 func (s *RedisSet) init() {
 	if s.Conn == nil {
