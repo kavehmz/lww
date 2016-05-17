@@ -43,6 +43,19 @@ func (s *RedisSet) checkErr(err error) {
 	s.LastState = nil
 }
 
+const updateToLatest string = `
+local c = tonumber(redis.call('ZSCORE', KEYS[1], ARGV[2]))
+if c then
+	if tonumber(ARGV[1]) > c then
+		redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
+		return tonumber(ARGV[2])
+	else
+		return 0
+	end
+else
+	return redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2])
+end`
+
 //Init will do a one time setup for underlying set. It will be called from WLL.Init
 func (s *RedisSet) Init() {
 	if s.Conn == nil {
@@ -62,8 +75,7 @@ func (s *RedisSet) Init() {
 		return
 	}
 
-	//This Lua function will do a __atomic__ check and set of timestamp only in incremental way.
-	s.setScript = redis.NewScript(1, `local c = tonumber(redis.call('ZSCORE', KEYS[1], ARGV[2])) ;if c then if tonumber(ARGV[1]) > c then redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) return tonumber(ARGV[2]) else return 0 end else return redis.call('ZADD', KEYS[1], ARGV[1], ARGV[2]) end`)
+	s.setScript = redis.NewScript(1, updateToLatest)
 }
 
 //Set adds an element to the set if it does not exists. It it exists Set will update the provided timestamp.
