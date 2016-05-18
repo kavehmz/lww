@@ -53,7 +53,10 @@ This might be useful in applications which can predict higher magnitude of Adds 
 */
 package lww
 
-import "time"
+import (
+	"testing"
+	"time"
+)
 
 // TimedSet interface defines what is required for an underlying set for WWL.
 type TimedSet interface {
@@ -127,4 +130,34 @@ func (lww *LWW) Get() []Element {
 		}
 	}
 	return l
+}
+
+// IntegrationTest is a common set of test for underlyings to call.
+// Passing this means LWW basic expectatinos from underlying sets is satisfied.
+func IntegrationTest(add TimedSet, remove TimedSet, t *testing.T) {
+	lww := LWW{AddSet: add, RemoveSet: remove}
+	lww.Init()
+	e := "e1"
+	ts := time.Now()
+
+	if lww.Exists(e) {
+		t.Error("New LWW claims to containt an element")
+	}
+
+	lww.Add(e, ts)
+	if !lww.Exists(e) {
+		t.Error("Newly added element does not exists and it should")
+	}
+
+	ts = ts.Add(time.Second)
+	lww.Remove(e, ts)
+	if lww.Exists(e) {
+		t.Error("An element which was remove with a more recent timestmap must be removed and is not")
+	}
+
+	ts = ts.Add(time.Second)
+	lww.Add(e, ts)
+	if !lww.Exists(e) {
+		t.Error("An element which was remove and added again with a more recent timestamp does not exists")
+	}
 }
