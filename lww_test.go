@@ -10,8 +10,8 @@ func TestLWW_Init(t *testing.T) {
 	lww := LWW{}
 	lww.Init()
 
-	if lww.add == nil || lww.remove == nil {
-		t.Error("LWW is not initialized correctly", lww.add, lww.remove)
+	if lww.AddSet == nil || lww.RemoveSet == nil {
+		t.Error("LWW is not initialized correctly", lww.AddSet, lww.RemoveSet)
 	}
 }
 
