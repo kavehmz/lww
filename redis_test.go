@@ -42,9 +42,7 @@ func TestRedisSet_init(t *testing.T) {
 	}
 }
 
-func setupSet(t interface {
-	Error(...interface{})
-}, r *redis.Conn, key string) RedisSet {
+func setupSet(t testing.TB, r *redis.Conn, key string) RedisSet {
 	c, _ := redis.Dial("tcp", "localhost:6379")
 	_, err := c.Do("DEL", key)
 	r = &c
