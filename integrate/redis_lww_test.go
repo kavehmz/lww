@@ -16,7 +16,8 @@ func setupSet(t interface {
 	if err != nil {
 		t.Error("Can't setup redis for tests", err)
 	}
-	s := lww.RedisSet{Conn: *r, Marshal: func(e lww.Element) string { return e.(string) }, UnMarshal: func(e string) lww.Element { return e }, SetKey: key}
+	s := lww.RedisSet{Conn: *r, Marshal: func(e interface{}) string { return e.(string) }, UnMarshal: func(e string) interface{} { return e }, SetKey: key}
+	s.Init()
 	return s
 }
 
