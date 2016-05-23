@@ -6,6 +6,7 @@
 [![Coverage Status](https://coveralls.io/repos/kavehmz/lww/badge.svg?branch=master&service=github)](https://coveralls.io/github/kavehmz/lww?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kavehmz/lww)](https://goreportcard.com/report/github.com/kavehmz/lww)
 
+# What is it
 
 In distributed computing, a __conflict-free replicated data type__ (CRDT) is a type of specially-designed data structure used to achieve strong eventual consistency (SEC) and monotonicity (absence of rollbacks).
 
