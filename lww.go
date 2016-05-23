@@ -50,6 +50,7 @@ Assuming you do that and they work as expected you can initialize LWW like:
 Note that in theory AddSet and RemoveSet can have different underlying attached.
 This might be useful in applications which can predict higher magnitude of Adds compared to Removes. In that case application can implementation different types of TimedSet to optimize the setup
 
+There is also a an underlying implementation that mixes two Map and Redis implementations. It is available at https://github.com/kavehmz/qset. That implementation is more practical as it will be as fast as internal maps but persistent and sharable through a redis server.
 */
 package lww
 

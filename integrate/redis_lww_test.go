@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/garyburd/redigo/redis"
-	"github.com/kavehmz/crdt"
+	"github.com/kavehmz/lww"
 )
 
 func setupSet(t interface {

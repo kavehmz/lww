@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kavehmz/crdt"
+	"github.com/kavehmz/lww"
 )
 
 // IntegrationTest is a common set of test for underlyings to call.
