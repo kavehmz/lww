@@ -1,6 +1,6 @@
 /*
 Package integrate defines expectations which LWW has from an underlying set.
-It has a fucntion IntegrationTest that can be used by underlying sets which
+It has a function IntegrationTest that can be used by underlying sets which
 implentent TimedSet to see if they are implementing a correct behaviour.
 
 You need to create a test and pass your set to IntegrationTest as shown in the example.
